@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 
 public class DrivetrainSubsystem extends SubsystemBase {
@@ -56,7 +57,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_rightFollower.follow(m_rightLeader);
 
     // Circumfrence * Gear Ratio = actual distance traveled
-    double factor = Math.PI * Units.inchesToMeters(5) * 7.75; // Gear ratio 7.75:1
+    double factor = Math.PI * Units.inchesToMeters(5) * 7.75 / m_leftEncoder.getCountsPerRevolution(); // Gear ratio 7.75:1
     m_leftEncoder.setPositionConversionFactor(factor);
     m_rightEncoder.setPositionConversionFactor(factor);
     m_leftEncoder.setVelocityConversionFactor(factor / 60);
@@ -114,7 +115,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     RamseteCommand ramseteCommand = new RamseteCommand(
         trajectory,
         this::getPose,
-        new RamseteController(DriveConstants.kRamseteB, DriveConstants.kRamseteZeta),
+        new RamseteController(AutoConstants.kRamseteB, AutoConstants.kRamseteZeta),
         new SimpleMotorFeedforward(
             DriveConstants.ksVolts,
             DriveConstants.kvVoltSecondsPerMeter,
