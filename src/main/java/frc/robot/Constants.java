@@ -21,10 +21,10 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
     public static final class DriveConstants {
         // FIXME: Enter correct CAN IDs of motors
-        public static final int kLeftLeader = 0;
-        public static final int kLeftFollower = 1;
-        public static final int kRightLeader = 2;
-        public static final int kRightFollower = 3;
+        public static final int kLeftLeader = 5;
+        public static final int kLeftFollower = 3;
+        public static final int kRightLeader = 4;
+        public static final int kRightFollower = 2;
 
         public static final double kTrackwidthMeters = Units.inchesToMeters(23.5);
         public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);

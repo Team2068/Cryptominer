@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -12,17 +14,17 @@ public class DriveCommand extends CommandBase {
   /** Creates a new DriveCommand. */
   DrivetrainSubsystem drivetrainSubsystem;
 
-  private double xSpeed;
-  private double rotationSpeed;
-
   SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(2);
+  DoubleSupplier leftSupplier;
+  DoubleSupplier rightSupplier;
 
-  public DriveCommand(DrivetrainSubsystem drivetrainSubsystem, double xSpeed, double rotationSpeed) {
+
+  public DriveCommand(DrivetrainSubsystem drivetrainSubsystem, DoubleSupplier leftSpeedSupplier, DoubleSupplier rightSpeedSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrainSubsystem);
     this.drivetrainSubsystem = drivetrainSubsystem;
-    this.xSpeed = xSpeed;
-    this.rotationSpeed = rotationSpeed;
+    this.leftSupplier = leftSpeedSupplier;
+    this.rightSupplier = rightSpeedSupplier;
   }
 
   // Called when the command is initially scheduled.
@@ -32,8 +34,9 @@ public class DriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    xSpeed = xSpeedLimiter.calculate(xSpeed); // add ramp rate to driver control
-    drivetrainSubsystem.arcadeDrive(xSpeed, rotationSpeed);
+    double leftSpeed = leftSupplier.getAsDouble();
+    double rightSpeed = rightSupplier.getAsDouble();
+    drivetrainSubsystem.arcadeDrive(leftSpeed, rightSpeed);
   }
 
   // Called once the command ends or is interrupted.
