@@ -5,9 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -20,7 +20,6 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
     public static final class DriveConstants {
-        // FIXME: Enter correct CAN IDs of motors
         public static final int kLeftLeader = 5;
         public static final int kLeftFollower = 3;
         public static final int kRightLeader = 4;
@@ -29,11 +28,13 @@ public final class Constants {
         public static final double kTrackwidthMeters = Units.inchesToMeters(23.5);
         public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
 
-        // TODO: Characterize drivetrain
-        public static final double kPDriveVel = 8.5;
-        public static final double ksVolts = 0;
-        public static final double kvVoltSecondsPerMeter = 0;
-        public static final double kaVoltSecondsSquaredPerMeter = 0;
+        public static final double kPDriveVel = 2.4122;
+        public static final double ksVolts = 0.16737;
+        public static final double kvVoltSecondsPerMeter = 2.454;
+        public static final double kaVoltSecondsSquaredPerMeter = 0.34951;
+
+        public static final double kGearRatio = 1 / 7.75;
+        public static final double kWheelDiameter = Units.inchesToMeters(5);
     }
 
     public static final class AutoConstants {
@@ -44,6 +45,7 @@ public final class Constants {
     }
 
     public static final class AutonPaths {
-        public static final Trajectory Bounce = PathPlanner.loadPath("Bounce", AutoConstants.kMaxSpeedMetersPerSecond, AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+        public static final PathPlannerTrajectory Bounce = PathPlanner.loadPath("Bounce", AutoConstants.kMaxSpeedMetersPerSecond, AutoConstants.kMaxAccelerationMetersPerSecondSquared);
+        public static final PathPlannerTrajectory Funny = PathPlanner.loadPath("Funny", AutoConstants.kMaxSpeedMetersPerSecond, AutoConstants.kMaxAccelerationMetersPerSecondSquared);
     }
 }

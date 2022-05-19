@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -15,8 +16,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -58,7 +57,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_leftMotors.setInverted(true);
 
     // Circumfrence * Gear Ratio = actual distance traveled
-    double factor = Math.PI * Units.inchesToMeters(5) * 7.75; // Gear ratio 7.75:1
+    double factor = Math.PI * DriveConstants.kWheelDiameter * DriveConstants.kGearRatio;
     m_leftEncoder.setPositionConversionFactor(factor);
     m_rightEncoder.setPositionConversionFactor(factor);
     m_leftEncoder.setVelocityConversionFactor(factor / 60);
@@ -68,7 +67,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public Rotation2d getGyroRotation() {
-    return Rotation2d.fromDegrees(Math.IEEEremainder(360, m_gyro.getAngle()));
+    return Rotation2d.fromDegrees(-m_gyro.getAngle());
   }
 
   public void zeroHeading() {
@@ -76,8 +75,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {
-    m_leftLeader.setVoltage(leftVolts);
-    m_rightLeader.setVoltage(rightVolts);
+    m_leftMotors.setVoltage(leftVolts);
+    m_rightMotors.setVoltage(rightVolts);
     m_drive.feed();
   }
 
@@ -107,7 +106,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getVelocity(), m_rightEncoder.getVelocity());
+    return new DifferentialDriveWheelSpeeds(-m_leftEncoder.getVelocity(), m_rightEncoder.getVelocity());
   }
 
   public Pose2d getPose() {
@@ -116,7 +115,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   // Putting this here so that we can simply follow a trajectory based off a given path
   // Instead of having to repeat this code over and over again in commandgroups.
-  public Command followTrajectory(Trajectory trajectory) {
+  public Command followTrajectory(PathPlannerTrajectory trajectory) {
+    // Reset odometry to the starting pose of the trajectory.
+    resetOdometryWithPose2d(trajectory.getInitialPose());
+
     RamseteCommand ramseteCommand = new RamseteCommand(
         trajectory,
         this::getPose,
@@ -133,16 +135,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
         this::tankDriveVolts,
         this);
 
-    // Reset odometry to the starting pose of the trajectory.
-    resetOdometryWithPose2d(trajectory.getInitialPose());
-
     // Run path following command, then stop at the end.
     return ramseteCommand.andThen(() -> tankDriveVolts(0, 0));
   }
 
   @Override
   public void periodic() {
-    m_odometry.update(getGyroRotation(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+    m_odometry.update(getGyroRotation(), -m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
     Pose2d pose = getPose();
     SmartDashboard.putNumber("Left Position", m_leftEncoder.getPosition());
     SmartDashboard.putNumber("Right Position", m_rightEncoder.getPosition());
@@ -150,5 +149,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Right Velocity", m_rightEncoder.getVelocity());
     SmartDashboard.putNumber("odometry x", pose.getX());
     SmartDashboard.putNumber("odometry y", pose.getY());
+    SmartDashboard.putNumber("odometry rotation", pose.getRotation().getDegrees());
   }
 }

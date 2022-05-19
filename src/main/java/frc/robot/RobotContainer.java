@@ -4,8 +4,11 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutonPaths;
 import frc.robot.commands.DriveCommand;
@@ -23,11 +26,12 @@ public class RobotContainer {
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   
   private final XboxController driverController = new XboxController(0);
+  private final SendableChooser<PathPlannerTrajectory> pathChooser = new SendableChooser<PathPlannerTrajectory>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
-    m_drivetrainSubsystem.setDefaultCommand(new DriveCommand(m_drivetrainSubsystem, () -> -driverController.getLeftY(), () -> -driverController.getRightY()));
+    m_drivetrainSubsystem.setDefaultCommand(new DriveCommand(m_drivetrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX()));
     SmartDashboard.putData("reset odometry", new InstantCommand(m_drivetrainSubsystem::resetOdometry));
     SmartDashboard.putData("zero gyro", new InstantCommand(m_drivetrainSubsystem::zeroHeading));
     configureButtonBindings();
@@ -40,7 +44,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // lololol
+    pathChooser.setDefaultOption("Bounce", AutonPaths.Bounce);
+    pathChooser.addOption("Funny", AutonPaths.Funny);
+
+    SmartDashboard.putData("Path Chooser", pathChooser);
   }
 
   /**
@@ -50,6 +57,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // Follow the test bounce path
-    return m_drivetrainSubsystem.followTrajectory(AutonPaths.Bounce);
+    return m_drivetrainSubsystem.followTrajectory(pathChooser.getSelected());
   }
 }

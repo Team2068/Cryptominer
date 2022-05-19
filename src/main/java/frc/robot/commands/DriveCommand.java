@@ -14,7 +14,7 @@ public class DriveCommand extends CommandBase {
   /** Creates a new DriveCommand. */
   DrivetrainSubsystem drivetrainSubsystem;
 
-  SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(2);
+  SlewRateLimiter translationLimiter = new SlewRateLimiter(2);
   DoubleSupplier leftSupplier;
   DoubleSupplier rightSupplier;
 
@@ -34,9 +34,9 @@ public class DriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double leftSpeed = leftSupplier.getAsDouble();
-    double rightSpeed = rightSupplier.getAsDouble();
-    drivetrainSubsystem.arcadeDrive(leftSpeed, rightSpeed);
+    double translationSpeed = translationLimiter.calculate(leftSupplier.getAsDouble());
+    double rotationSpeed = rightSupplier.getAsDouble();
+    drivetrainSubsystem.arcadeDrive(translationSpeed, rotationSpeed);
   }
 
   // Called once the command ends or is interrupted.
